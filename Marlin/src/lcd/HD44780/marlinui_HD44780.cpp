@@ -239,6 +239,18 @@ void MarlinUI::set_custom_characters(const HD44780CharSet screen_charset/*=CHARS
     #endif
   };
 
+  const static PROGMEM byte flowrate[8] = {
+    B11100,
+    B10000,
+    B11000,
+    B10100,
+    B00100,
+    B00100,
+    B00111,
+    B00000
+
+  };
+
   const static PROGMEM byte clock[8] = {
     B00000,
     B01110,
@@ -318,12 +330,13 @@ void MarlinUI::set_custom_characters(const HD44780CharSet screen_charset/*=CHARS
     }
     else
   #endif
-    { // Info Screen uses 5 special characters
+    { // Info Screen uses 6 special characters
       createChar_P(LCD_STR_BEDTEMP[0], bedTemp);
       createChar_P(LCD_STR_DEGREE[0], degree);
       createChar_P(LCD_STR_THERMOMETER[0], thermometer);
       createChar_P(LCD_STR_FEEDRATE[0], feedrate);
       createChar_P(LCD_STR_CLOCK[0], clock);
+      createChar_P(LCD_STR_FLOWRATE[0], flowrate);
 
       #if ENABLED(LCD_PROGRESS_BAR)
         if (screen_charset == CHARSET_INFO) { // 3 Progress bar characters for info screen
@@ -934,9 +947,14 @@ void MarlinUI::draw_status_screen() {
     // ========== Line 3 ==========
 
     #if LCD_HEIGHT > 3
-
+    lcd_moveto(0, 2);
+      if(blink){
+      lcd_put_wchar(0, 2, LCD_STR_FLOWRATE[0]);
+      lcd_put_u8str(i16tostr3rj(planner.flow_percentage[0]));
+      } else {
       lcd_put_wchar(0, 2, LCD_STR_FEEDRATE[0]);
       lcd_put_u8str(i16tostr3rj(feedrate_percentage));
+      }
       lcd_put_wchar('%');
 
       const uint8_t timepos = draw_elapsed_or_remaining_time(LCD_WIDTH - 1, blink);
